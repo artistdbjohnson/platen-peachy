@@ -77,7 +77,7 @@ Leave `generate()` and `svg.ts` alone. They already match the SM3 strike → arc
 
 ## Layout notes
 
-Dark, rounded cards, editorial type (Fraunces + IBM Plex Mono). Soft peach is an accent, not a theme. Hanssen / Framer-ish portfolio dashboard: hero art, a rail of folds, one column under ~860px. Anti-slop: no kitchen-sink panel, no Inter, no purple gradient.
+Dark, rounded cards, editorial type (Fraunces + IBM Plex Mono). Soft peach is an accent, not a theme. Layout follows the Framer Hanssen portfolio pattern: hero sheet, a stacked accordion (Essentials / Latest work / About / Engine), single column under ~860px. Anti-slop: no kitchen-sink panel, no Inter, no purple gradient. The Gemini refresh prototype was stripped down to this dashboard — not copied wholesale.
 
 ## License
 

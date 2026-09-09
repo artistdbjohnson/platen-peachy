@@ -156,158 +156,155 @@ export function App() {
             </p>
           </section>
 
-          <section className="card essentials">
-            <p className="card-kicker">essentials</p>
-            <label className="field">
-              <span>Seed</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                spellCheck={false}
-                value={seedDraft}
-                onChange={(e) => setSeedDraft(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
-                onBlur={onSeedBlur}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") generate("keep");
-                }}
-              />
-            </label>
+          <div className="stack card">
+            <Collapsible title="Essentials" subtitle="seed · params · save" defaultOpen>
+              <label className="field">
+                <span>Seed</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={seedDraft}
+                  onChange={(e) => setSeedDraft(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                  onBlur={onSeedBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") generate("keep");
+                  }}
+                />
+              </label>
 
-            <label className="field">
-              <span>Engine</span>
-              <select
-                value={engineId}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  setEngineId(id);
-                }}
-              >
-                {engines.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.id} — {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="engine-blurb">{engine.blurb}</p>
+              <label className="field">
+                <span>Engine</span>
+                <select
+                  value={engineId}
+                  onChange={(e) => {
+                    setEngineId(e.target.value);
+                  }}
+                >
+                  {engines.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.id} — {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="engine-blurb">{engine.blurb}</p>
 
-            <label className="field range">
-              <span>
-                Density <em>{params.density.toFixed(2)}</em>
-              </span>
-              <input
-                type="range"
-                min={0.2}
-                max={1}
-                step={0.01}
-                value={params.density}
-                onChange={(e) => setParams((p) => ({ ...p, density: Number(e.target.value) }))}
-              />
-            </label>
+              <label className="field range">
+                <span>
+                  Density <em>{params.density.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.2}
+                  max={1}
+                  step={0.01}
+                  value={params.density}
+                  onChange={(e) => setParams((p) => ({ ...p, density: Number(e.target.value) }))}
+                />
+              </label>
 
-            <label className="field range">
-              <span>
-                Scale <em>{params.scale.toFixed(2)}</em>
-              </span>
-              <input
-                type="range"
-                min={0.1}
-                max={1}
-                step={0.01}
-                value={params.scale}
-                onChange={(e) => setParams((p) => ({ ...p, scale: Number(e.target.value) }))}
-              />
-            </label>
+              <label className="field range">
+                <span>
+                  Scale <em>{params.scale.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={1}
+                  step={0.01}
+                  value={params.scale}
+                  onChange={(e) => setParams((p) => ({ ...p, scale: Number(e.target.value) }))}
+                />
+              </label>
 
-            <label className="field range">
-              <span>
-                Ink <em>{params.ink.toFixed(2)}</em>
-              </span>
-              <input
-                type="range"
-                min={0.25}
-                max={1}
-                step={0.01}
-                value={params.ink}
-                onChange={(e) => setParams((p) => ({ ...p, ink: Number(e.target.value) }))}
-              />
-            </label>
-          </section>
+              <label className="field range">
+                <span>
+                  Ink <em>{params.ink.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.25}
+                  max={1}
+                  step={0.01}
+                  value={params.ink}
+                  onChange={(e) => setParams((p) => ({ ...p, ink: Number(e.target.value) }))}
+                />
+              </label>
 
-          <section className="card export-card">
-            <p className="card-kicker">save</p>
-            <div className="export-row">
-              <button type="button" className="export" onClick={onExportSvg} disabled={!!exporting}>
-                {exporting === "svg" ? "Saving…" : "Save SVG"}
-              </button>
-              <button type="button" className="export" onClick={() => void onExportPng()} disabled={!!exporting}>
-                {exporting === "png" ? "Saving…" : "Save PNG"}
-              </button>
-            </div>
-            <p className="hint">
-              SVG is archival inches (10 CPI / 6 LPI). PNG is a 150 dpi preview.
-            </p>
-            {exportNote ? <p className="note-ok">{exportNote}</p> : null}
-          </section>
-
-          <Collapsible title="Latest work" subtitle={`${history.length} kept`} defaultOpen={false}>
-            {history.length === 0 ? (
-              <p className="empty">Nothing struck yet. Generate once and it lands here.</p>
-            ) : (
-              <ul className="history">
-                {history.map((entry) => (
-                  <li key={entry.id}>
-                    <button type="button" onClick={() => applyHistory(entry)}>
-                      <span className="hist-engine">{entry.result.engineId}</span>
-                      <span className="hist-seed">{padSeed(entry.result.params.seed)}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Collapsible>
-
-          <Collapsible title="About peachy" subtitle="vs rosy" defaultOpen={false}>
-            <div className="prose">
-              <p>
-                <strong>platen-peachy</strong> is the second Platen skin — a single-screen
-                dashboard. Art is the hero. Controls stay tight. Sections fold so a phone
-                does not bury the sheet.
+              <div className="export-row">
+                <button type="button" className="export" onClick={onExportSvg} disabled={!!exporting}>
+                  {exporting === "svg" ? "Saving…" : "Save SVG"}
+                </button>
+                <button type="button" className="export" onClick={() => void onExportPng()} disabled={!!exporting}>
+                  {exporting === "png" ? "Saving…" : "Save PNG"}
+                </button>
+              </div>
+              <p className="hint">
+                SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.
               </p>
-              <p>
-                <strong>platen-rosy</strong> is the full cockpit: Randomize, Regenerate,
-                Curate, Gallery, Motus, Stack. Useful, crowded. Peachy answers that pain
-                with one unmistakable Generate.
-              </p>
-              <p>
-                Live rosy stays at{" "}
-                <a href="https://platen-rosy.vercel.app" target="_blank" rel="noreferrer">
-                  platen-rosy.vercel.app
-                </a>
-                . This repo does not touch it.
-              </p>
-            </div>
-          </Collapsible>
+              {exportNote ? <p className="note-ok">{exportNote}</p> : null}
+            </Collapsible>
 
-          <Collapsible title="Engine" subtitle="placeholder → Platen" defaultOpen={false}>
-            <div className="prose">
-              <p>
-                The canvas is a seeded typewriter-glyph field. Weights are closed-form;
-                jitter, normalize, floor, and five-band glyph mapping already follow
-                the SM3 pipeline in{" "}
-                <a href="https://github.com/artistdbjohnson/Platen" target="_blank" rel="noreferrer">
-                  artistdbjohnson/Platen
-                </a>
-                .
-              </p>
-              <p>
-                Register a real engine in <code>src/engine/index.ts</code> by wrapping{" "}
-                <code>calcMotifWeight(x, y, w, h, engine, params)</code>. Do not rewrite
-                generate or export.
-              </p>
-            </div>
-          </Collapsible>
+            <Collapsible title="Latest work" subtitle={`${history.length} kept`} defaultOpen={false}>
+              {history.length === 0 ? (
+                <p className="empty">Nothing struck yet. Generate once and it lands here.</p>
+              ) : (
+                <ul className="history">
+                  {history.map((entry) => (
+                    <li key={entry.id}>
+                      <button type="button" onClick={() => applyHistory(entry)}>
+                        <span className="hist-engine">{entry.result.engineId}</span>
+                        <span className="hist-seed">{padSeed(entry.result.params.seed)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Collapsible>
+
+            <Collapsible title="About peachy" subtitle="vs rosy" defaultOpen={false}>
+              <div className="prose">
+                <p>
+                  <strong>platen-peachy</strong> is the second Platen skin — a single-screen
+                  dashboard. Art is the hero. Controls stay tight. Sections fold so a phone
+                  does not bury the sheet.
+                </p>
+                <p>
+                  <strong>platen-rosy</strong> is the full cockpit: Randomize, Regenerate,
+                  Curate, Gallery, Motus, Stack. Useful, crowded. Peachy answers that pain
+                  with one unmistakable Generate.
+                </p>
+                <p>
+                  Live rosy stays at{" "}
+                  <a href="https://platen-rosy.vercel.app" target="_blank" rel="noreferrer">
+                    platen-rosy.vercel.app
+                  </a>
+                  . This repo does not touch it.
+                </p>
+              </div>
+            </Collapsible>
+
+            <Collapsible title="Engine" subtitle="placeholder → Platen" defaultOpen={false}>
+              <div className="prose">
+                <p>
+                  The canvas is a seeded typewriter-glyph field. Weights are closed-form;
+                  jitter, normalize, floor, and five-band glyph mapping already follow
+                  the SM3 pipeline in{" "}
+                  <a href="https://github.com/artistdbjohnson/Platen" target="_blank" rel="noreferrer">
+                    artistdbjohnson/Platen
+                  </a>
+                  .
+                </p>
+                <p>
+                  Register a real engine in <code>src/engine/index.ts</code> by wrapping{" "}
+                  <code>calcMotifWeight(x, y, w, h, engine, params)</code>. Do not rewrite
+                  generate or export.
+                </p>
+              </div>
+            </Collapsible>
+          </div>
         </aside>
       </main>
 

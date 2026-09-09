@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 interface CollapsibleProps {
   title: string;
@@ -8,8 +8,14 @@ interface CollapsibleProps {
 }
 
 export function Collapsible({ title, subtitle, defaultOpen = false, children }: CollapsibleProps) {
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
-    <details className="fold card" open={defaultOpen || undefined}>
+    <details
+      className="fold"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
       <summary>
         <span className="fold-title">{title}</span>
         {subtitle ? <span className="fold-sub">{subtitle}</span> : null}

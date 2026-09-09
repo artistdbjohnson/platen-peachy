@@ -190,10 +190,13 @@ h1 {
   min-width: 0;
 }
 
-.generate-card,
-.essentials,
-.export-card {
+.generate-card {
   padding: 16px 16px 18px;
+}
+
+.stack {
+  padding: 4px 0;
+  overflow: hidden;
 }
 
 .card-kicker {
@@ -315,8 +318,8 @@ h1 {
   color: var(--ok);
 }
 
-.fold {
-  overflow: hidden;
+.fold + .fold {
+  border-top: 1px solid var(--rule);
 }
 
 .fold > summary {
