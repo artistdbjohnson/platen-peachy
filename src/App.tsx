@@ -124,19 +124,19 @@ export function App() {
           <div className="hero-frame" tabIndex={0}>
             <div className="sheet" dangerouslySetInnerHTML={{ __html: svg }} />
             <div className="hero-caption">
-              <span>Selected sheet</span>
-              <span>scroll</span>
+              <span>recto</span>
+              <span>scroll the sheet</span>
             </div>
           </div>
         </section>
 
         <aside className="rail">
           <section className="identity">
-            <p className="eyebrow">v0 · second skin</p>
+            <p className="eyebrow">douglxss · peachy · v0</p>
             <h1>The page still in the machine.</h1>
             <p className="bio">
-              Typewriter strikes on a dark sheet. One Generate. Everything else folds —
-              Hanssen-style stacks, not a rosy cockpit.
+              An Olympia SM3 remembering West LA. One Generate. The rest folds so the
+              sheet stays in front.
             </p>
             <button type="button" className="generate" onClick={() => generate("keep")}>
               Generate
@@ -146,6 +146,7 @@ export function App() {
             </button>
           </section>
 
+          {/* Fold ids stay stable so Folio can remap section names from Framer. */}
           <div className="stack">
             <Collapsible
               id="latest"
