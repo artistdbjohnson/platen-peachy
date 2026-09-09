@@ -44,7 +44,7 @@ Build: `npm run build`. Preview: `npm run preview`.
 2. Press **Generate** (desktop rail and sticky on ~390px). Optional: **New seed, then generate**.
 3. Tune seed / engine / density / scale / ink. Keep it small on purpose.
 4. **Save SVG** (archival inches, 10 CPI / 6 LPI, 0.082" slug) or **Save PNG** (150 dpi preview).
-5. **Latest work**, **About peachy**, and **Engine** are collapsible. Closed by default so art is not buried.
+5. **Latest work**, **Essentials**, **About peachy**, and **Engine** are a Hanssen-style link stack. On a phone they start closed so the sheet stays the hero. Desktop opens Essentials.
 
 ## Engine scaffold
 
@@ -77,7 +77,11 @@ Leave `generate()` and `svg.ts` alone. They already match the SM3 strike → arc
 
 ## Layout notes
 
-Dark, rounded cards, editorial type (Fraunces + IBM Plex Mono). Soft peach is an accent, not a theme. Layout follows the Framer Hanssen portfolio pattern: hero sheet, a stacked accordion (Essentials / Latest work / About / Engine), single column under ~860px. Anti-slop: no kitchen-sink panel, no Inter, no purple gradient. The Gemini refresh prototype was stripped down to this dashboard — not copied wholesale.
+Dark, rounded cards, editorial type (Fraunces + IBM Plex Mono). Soft peach is an accent, not a theme.
+
+Layout follows the public [Hanssen](https://hanssen-template.framer.website/) pattern, not a Framer login: full-height hero sheet, identity card, high-contrast **Generate** (Hanssen’s “Contact Me”), then a link-stack of folds — Latest work, Essentials, About, Engine. Single column under ~860px. On a phone the folds start closed so the sheet stays on screen. The Gemini refresh prototype was stripped to this dashboard — not copied.
+
+Anti-slop: no kitchen-sink panel, no Inter, no purple gradient.
 
 ## License
 

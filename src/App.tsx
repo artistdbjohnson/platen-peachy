@@ -12,6 +12,7 @@ import {
   type HistoryEntry,
 } from "./engine";
 import { Collapsible } from "./ui/Collapsible";
+import { useMediaQuery } from "./ui/useMediaQuery";
 
 const DEFAULT_PARAMS: EngineParams = {
   seed: 1952,
@@ -26,6 +27,7 @@ function padSeed(n: number): string {
 
 export function App() {
   const engines = useMemo(() => listEngines(), []);
+  const isPhone = useMediaQuery("(max-width: 860px)");
   const [engineId, setEngineId] = useState(engines[0].id);
   const [params, setParams] = useState<EngineParams>(DEFAULT_PARAMS);
   const [seedDraft, setSeedDraft] = useState(String(DEFAULT_PARAMS.seed));
@@ -33,29 +35,40 @@ export function App() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [exporting, setExporting] = useState<"svg" | "png" | null>(null);
   const [exportNote, setExportNote] = useState<string | null>(null);
+  const [openFold, setOpenFold] = useState<string | null>(null);
 
   const engine = engines.find((e) => e.id === engineId) ?? engines[0];
   const svg = useMemo(() => resultToPreviewSvg(result), [result]);
+  const essentialsOpen = openFold === "essentials" || (!isPhone && openFold === null);
 
-  const commit = useCallback(
-    (nextEngine: string, nextParams: EngineParams, record: boolean) => {
-      const next = runEngine(nextEngine, nextParams);
-      setResult(next);
-      setParams(nextParams);
-      setSeedDraft(String(nextParams.seed));
-      if (record) {
-        setHistory((prev) => {
-          const entry: HistoryEntry = {
-            id: `${next.engineId}-${next.params.seed}-${Date.now()}`,
-            at: Date.now(),
-            result: next,
-          };
-          return [entry, ...prev].slice(0, 8);
-        });
-      }
+  const toggleFold = useCallback(
+    (id: string) => {
+      setOpenFold((current) => {
+        const isEssentialsDefault = !isPhone && current === null && id === "essentials";
+        if (isEssentialsDefault) return "";
+        if (current === id) return isPhone ? null : "";
+        return id;
+      });
     },
-    [],
+    [isPhone],
   );
+
+  const commit = useCallback((nextEngine: string, nextParams: EngineParams, record: boolean) => {
+    const next = runEngine(nextEngine, nextParams);
+    setResult(next);
+    setParams(nextParams);
+    setSeedDraft(String(nextParams.seed));
+    if (record) {
+      setHistory((prev) => {
+        const entry: HistoryEntry = {
+          id: `${next.engineId}-${next.params.seed}-${Date.now()}`,
+          at: Date.now(),
+          result: next,
+        };
+        return [entry, ...prev].slice(0, 8);
+      });
+    }
+  }, []);
 
   const generate = useCallback(
     (mode: "keep" | "fresh") => {
@@ -107,57 +120,81 @@ export function App() {
     <div className="shell">
       <div className="grain" aria-hidden="true" />
 
-      <header className="mast">
-        <div className="brand">
+      <header className="topbar">
+        <p className="logo">
           <span className="ribbon" aria-hidden="true" />
-          <div>
-            <p className="eyebrow">platen-peachy · v0</p>
-            <h1>The page still in the machine.</h1>
-          </div>
-        </div>
-        <p className="mast-meta">
-          SM3 · {result.cols} × {result.rows} · {engine.name} · seed {padSeed(result.params.seed)}
+          platen-peachy
+        </p>
+        <p className="top-meta">
+          SM3 · {result.cols}×{result.rows} · {engine.name} · {padSeed(result.params.seed)}
         </p>
       </header>
 
       <main className="dash">
-        <section className="hero card" aria-label="Artwork">
-          <div className="hero-head">
-            <span>recto</span>
-            <span>scroll the sheet</span>
-          </div>
+        <section className="hero" aria-label="Artwork">
           <div className="hero-frame" tabIndex={0}>
-            <div
-              className="sheet"
-              dangerouslySetInnerHTML={{ __html: svg }}
-            />
+            <div className="sheet" dangerouslySetInnerHTML={{ __html: svg }} />
+            <div className="hero-caption">
+              <span>Selected sheet</span>
+              <span>scroll</span>
+            </div>
           </div>
         </section>
 
         <aside className="rail">
-          <section className="card generate-card">
-            <p className="card-kicker">primary</p>
-            <button
-              type="button"
-              className="generate"
-              onClick={() => generate("keep")}
-            >
+          <section className="identity">
+            <p className="eyebrow">v0 · second skin</p>
+            <h1>The page still in the machine.</h1>
+            <p className="bio">
+              Typewriter strikes on a dark sheet. One Generate. Everything else folds —
+              Hanssen-style stacks, not a rosy cockpit.
+            </p>
+            <button type="button" className="generate" onClick={() => generate("keep")}>
               Generate
             </button>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => generate("fresh")}
-            >
+            <button type="button" className="ghost" onClick={() => generate("fresh")}>
               New seed, then generate
             </button>
-            <p className="hint">
-              One action. Not Randomize. Not Regenerate. Press the platen.
-            </p>
           </section>
 
-          <div className="stack card">
-            <Collapsible title="Essentials" subtitle="seed · params · save" defaultOpen>
+          <div className="stack">
+            <Collapsible
+              id="latest"
+              title="Latest work"
+              subtitle={`${history.length} kept`}
+              open={openFold === "latest"}
+              onToggle={toggleFold}
+            >
+              {history.length === 0 ? (
+                <p className="empty">Nothing struck yet. Generate once and it lands here.</p>
+              ) : (
+                <ul className="history">
+                  {history.map((entry) => (
+                    <li key={entry.id}>
+                      <button type="button" onClick={() => applyHistory(entry)}>
+                        <span
+                          className="hist-thumb"
+                          aria-hidden="true"
+                          dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(entry.result) }}
+                        />
+                        <span className="hist-copy">
+                          <span className="hist-engine">{entry.result.engineId}</span>
+                          <span className="hist-seed">{padSeed(entry.result.params.seed)}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Collapsible>
+
+            <Collapsible
+              id="essentials"
+              title="Essentials"
+              subtitle="seed · params · save"
+              open={essentialsOpen}
+              onToggle={toggleFold}
+            >
               <label className="field">
                 <span>Seed</span>
                 <input
@@ -176,12 +213,7 @@ export function App() {
 
               <label className="field">
                 <span>Engine</span>
-                <select
-                  value={engineId}
-                  onChange={(e) => {
-                    setEngineId(e.target.value);
-                  }}
-                >
+                <select value={engineId} onChange={(e) => setEngineId(e.target.value)}>
                   {engines.map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.id} — {item.name}
@@ -241,30 +273,17 @@ export function App() {
                   {exporting === "png" ? "Saving…" : "Save PNG"}
                 </button>
               </div>
-              <p className="hint">
-                SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.
-              </p>
+              <p className="hint">SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.</p>
               {exportNote ? <p className="note-ok">{exportNote}</p> : null}
             </Collapsible>
 
-            <Collapsible title="Latest work" subtitle={`${history.length} kept`} defaultOpen={false}>
-              {history.length === 0 ? (
-                <p className="empty">Nothing struck yet. Generate once and it lands here.</p>
-              ) : (
-                <ul className="history">
-                  {history.map((entry) => (
-                    <li key={entry.id}>
-                      <button type="button" onClick={() => applyHistory(entry)}>
-                        <span className="hist-engine">{entry.result.engineId}</span>
-                        <span className="hist-seed">{padSeed(entry.result.params.seed)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Collapsible>
-
-            <Collapsible title="About peachy" subtitle="vs rosy" defaultOpen={false}>
+            <Collapsible
+              id="about"
+              title="About peachy"
+              subtitle="vs rosy"
+              open={openFold === "about"}
+              onToggle={toggleFold}
+            >
               <div className="prose">
                 <p>
                   <strong>platen-peachy</strong> is the second Platen skin — a single-screen
@@ -273,8 +292,7 @@ export function App() {
                 </p>
                 <p>
                   <strong>platen-rosy</strong> is the full cockpit: Randomize, Regenerate,
-                  Curate, Gallery, Motus, Stack. Useful, crowded. Peachy answers that pain
-                  with one unmistakable Generate.
+                  Curate, Gallery, Motus, Stack. Peachy answers that with one Generate.
                 </p>
                 <p>
                   Live rosy stays at{" "}
@@ -286,12 +304,17 @@ export function App() {
               </div>
             </Collapsible>
 
-            <Collapsible title="Engine" subtitle="placeholder → Platen" defaultOpen={false}>
+            <Collapsible
+              id="engine"
+              title="Engine"
+              subtitle="placeholder → Platen"
+              open={openFold === "engine"}
+              onToggle={toggleFold}
+            >
               <div className="prose">
                 <p>
-                  The canvas is a seeded typewriter-glyph field. Weights are closed-form;
-                  jitter, normalize, floor, and five-band glyph mapping already follow
-                  the SM3 pipeline in{" "}
+                  Seeded typewriter-glyph field. Weights are closed-form; jitter, normalize,
+                  floor, and five-band glyphs follow the SM3 pipeline in{" "}
                   <a href="https://github.com/artistdbjohnson/Platen" target="_blank" rel="noreferrer">
                     artistdbjohnson/Platen
                   </a>
@@ -299,22 +322,13 @@ export function App() {
                 </p>
                 <p>
                   Register a real engine in <code>src/engine/index.ts</code> by wrapping{" "}
-                  <code>calcMotifWeight(x, y, w, h, engine, params)</code>. Do not rewrite
-                  generate or export.
+                  <code>calcMotifWeight(x, y, w, h, engine, params)</code>.
                 </p>
               </div>
             </Collapsible>
           </div>
         </aside>
       </main>
-
-      <footer className="colophon">
-        <span>platen-peachy</span>
-        <span className="dot" />
-        <span>memory / degraded americana</span>
-        <span className="dot" />
-        <span>, . + x * / # -</span>
-      </footer>
     </div>
   );
 }
