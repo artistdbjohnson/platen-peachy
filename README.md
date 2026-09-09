@@ -75,6 +75,15 @@ registerEngine({
 
 Leave `generate()` and `svg.ts` alone. They already match the SM3 strike → archival SVG path.
 
+The **plate** (what you see in the hero and what export writes) is rosy-format, not peachy chrome:
+
+1. `PLATEN  -  BY DGLXSS  -  SEED #…`
+2. `LEVEL 1`–`5` with `GLYPH` + `DENSITY`
+3. `DATE: YYYY.MM.DD \\ SPACE: … - ENG: … - SYM: … - INK: …`
+4. the glyph field
+
+Do not replace that block with RECTO captions or gradient art cards. Dashboard chrome around the plate may stay peachy.
+
 ## Layout notes
 
 **Visual north star:** Folio (series director) is redesigning the Framer Hanssen template into platen-peachy. This repo ships the working dashboard now. When Folio’s Framer structure lands, align layout and section names — do not invent a photographer portfolio in the meantime.

@@ -19,11 +19,19 @@ export const SM3 = {
 } as const;
 
 /** Eight natively typeable SM3 glyphs. */
-export const GLYPHS = [",", ".", "+", "x", "*", "/", "#", "-"] as const;
+export const GLYPHS = [",", ".", "+", "x", "X", "*", "/", "#", "-"] as const;
 export type Glyph = (typeof GLYPHS)[number];
 
-/** Density bands used by Platen (rosy / core worker). */
-export const GLYPH_BY_LEVEL: readonly Glyph[] = [",", ".", "+", "x", "*"];
+/** Rosy header legend — slash / dot / plus / X / asterisk. */
+export const GLYPH_BY_LEVEL: readonly Glyph[] = ["/", ".", "+", "X", "*"];
+
+export const LEVEL_BANDS = [
+  { level: 1, glyph: "/", density: "0.20 - 0.36" },
+  { level: 2, glyph: ".", density: "0.36 - 0.51" },
+  { level: 3, glyph: "+", density: "0.51 - 0.66" },
+  { level: 4, glyph: "X", density: "0.66 - 0.81" },
+  { level: 5, glyph: "*", density: "0.81 - 1.00" },
+] as const;
 
 export type GlyphLevel = 0 | 1 | 2 | 3 | 4;
 

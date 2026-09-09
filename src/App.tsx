@@ -123,10 +123,6 @@ export function App() {
         <section className="hero" aria-label="Artwork">
           <div className="hero-frame" tabIndex={0}>
             <div className="sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-            <div className="hero-caption">
-              <span>recto</span>
-              <span>scroll the sheet</span>
-            </div>
           </div>
         </section>
 

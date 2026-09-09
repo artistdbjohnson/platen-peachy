@@ -1,29 +1,44 @@
+import { headerRowCount, plateHeaderLines } from "./plate";
 import { SM3, type EngineResult } from "./types";
 
-const PAPER = "#161310";
-const INK = "#f0d8bc";
-const RULE = "#3a3228";
+/** Flat plate — no gradient cards. Rosy black canvas. */
+const PAPER = "#111111";
+const INK = "#e8e0d4";
 
 /** 72 user units per inch so font-size="11" is a true 11pt strike. */
 const U = 72;
 
 function pageSize(result: EngineResult) {
   const pad = 0.32 * U;
+  const rows = result.rows + headerRowCount(result);
   const width = result.cols * SM3.cellIn * U + pad * 2;
-  const height = result.rows * SM3.lineIn * U + pad * 2;
-  return { pad, width, height, widthIn: width / U, heightIn: height / U };
+  const height = rows * SM3.lineIn * U + pad * 2;
+  return { pad, width, height, widthIn: width / U, heightIn: height / U, rows };
+}
+
+function cellText(cx: number, cy: number, ch: string, pad: number, seed: number): string {
+  const x = pad + cx * SM3.cellIn * U + (SM3.cellIn * U) / 2;
+  const y = pad + cy * SM3.lineIn * U + SM3.lineIn * U * 0.72;
+  const drift = ((cx * 17 + cy * 9 + seed) % 7) * 0.12 - 0.36;
+  return `<text x="${(x + drift).toFixed(2)}" y="${y.toFixed(2)}">${escapeXml(ch)}</text>`;
 }
 
 function marks(result: EngineResult, pad: number): string {
-  const { cells, params } = result;
-  return cells
-    .map((c) => {
-      const x = pad + c.cx * SM3.cellIn * U + (SM3.cellIn * U) / 2;
-      const y = pad + c.cy * SM3.lineIn * U + SM3.lineIn * U * 0.72;
-      const drift = ((c.cx * 17 + c.cy * 9 + params.seed) % 7) * 0.12 - 0.36;
-      return `<text x="${(x + drift).toFixed(2)}" y="${y.toFixed(2)}">${escapeXml(c.glyph)}</text>`;
-    })
-    .join("");
+  const header = plateHeaderLines(result);
+  const offset = headerRowCount(result);
+  const head = header.flatMap((line, cy) =>
+    [...fitRow(line, result.cols)].flatMap((ch, cx) =>
+      ch === " " ? [] : [cellText(cx, cy, ch, pad, result.params.seed)],
+    ),
+  );
+  const field = result.cells.map((c) =>
+    cellText(c.cx, c.cy + offset, c.glyph, pad, result.params.seed),
+  );
+  return [...head, ...field].join("");
+}
+
+function fitRow(line: string, cols: number): string {
+  return line.length >= cols ? line.slice(0, cols) : line.padEnd(cols, " ");
 }
 
 export function resultToSvg(
@@ -33,11 +48,10 @@ export function resultToSvg(
   const paper = opts?.paper ?? PAPER;
   const ink = opts?.ink ?? INK;
   const { pad, width, height, widthIn, heightIn } = pageSize(result);
-  const opacity = 0.5 + result.params.ink * 0.5;
+  const opacity = 0.55 + result.params.ink * 0.45;
 
-  const body = `<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn.toFixed(3)}in" height="${heightIn.toFixed(3)}in" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}" role="img" aria-label="Platen sheet">
+  const body = `<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn.toFixed(3)}in" height="${heightIn.toFixed(3)}in" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}" role="img" aria-label="Platen plate">
   <rect width="100%" height="100%" fill="${paper}"/>
-  <rect x="${(pad / 2).toFixed(2)}" y="${(pad / 2).toFixed(2)}" width="${(width - pad).toFixed(2)}" height="${(height - pad).toFixed(2)}" fill="none" stroke="${RULE}" stroke-width="0.75"/>
   <g fill="${ink}" fill-opacity="${opacity.toFixed(3)}" font-family="Courier New, Courier, monospace" font-size="11" text-anchor="middle">
     ${marks(result, pad)}
   </g>

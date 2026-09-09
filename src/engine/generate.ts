@@ -1,5 +1,5 @@
 import { makePRNG } from "./prng";
-import { GLYPH_BY_LEVEL, GLYPHS, type Cell, type EngineParams, type EngineResult, type Glyph, type GlyphLevel, type GridSpec, type PlatenEngine } from "./types";
+import { GLYPH_BY_LEVEL, type Cell, type EngineParams, type EngineResult, type Glyph, type GlyphLevel, type GridSpec, type PlatenEngine } from "./types";
 
 const DEFAULT_GRID: GridSpec = { cols: 39, rows: 51 };
 
@@ -54,7 +54,7 @@ export function generate(
       const level = levelFromWeight(wt);
       let glyph: Glyph = GLYPH_BY_LEVEL[level];
       if (rng.rfl() < altChance) {
-        glyph = GLYPHS[5 + rng.rin(0, 2)];
+        glyph = (["#", "-", ","] as const)[rng.rin(0, 2)];
       }
       cells.push({ cx, cy, wt, level, glyph });
     }

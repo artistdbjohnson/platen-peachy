@@ -137,7 +137,7 @@ code {
 
 .sheet {
   min-width: 100%;
-  padding: 10px 10px 48px;
+  padding: 10px;
 }
 
 .sheet svg {
@@ -145,19 +145,6 @@ code {
   width: 100%;
   height: auto;
   min-width: 280px;
-}
-
-.hero-caption {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 16px;
-  color: var(--mute);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: lowercase;
-  background: linear-gradient(transparent, rgba(7, 7, 6, 0.72));
 }
 
 .rail {
