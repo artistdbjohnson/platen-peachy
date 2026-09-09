@@ -50,8 +50,8 @@ export function resultToSvg(
   const { pad, width, height, widthIn, heightIn } = pageSize(result);
   const opacity = 0.55 + result.params.ink * 0.45;
 
-  const body = `<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn.toFixed(3)}in" height="${heightIn.toFixed(3)}in" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}" role="img" aria-label="Platen plate">
-  <rect width="100%" height="100%" fill="${paper}"/>
+  const body = `<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn.toFixed(3)}in" height="${heightIn.toFixed(3)}in" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Platen plate">
+  <rect x="0" y="0" width="100%" height="100%" rx="0" ry="0" fill="${paper}"/>
   <g fill="${ink}" fill-opacity="${opacity.toFixed(3)}" font-family="Courier New, Courier, monospace" font-size="11" text-anchor="middle">
     ${marks(result, pad)}
   </g>

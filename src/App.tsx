@@ -281,9 +281,20 @@ export function App() {
         </aside>
 
         <section className="hero" aria-label="Artwork">
-          <button type="button" className="hero-frame" onClick={() => setViewer(result)}>
-            <div className="sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-          </button>
+          <div
+            className="hero-frame"
+            role="button"
+            tabIndex={0}
+            onClick={() => setViewer(result)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setViewer(result);
+              }
+            }}
+          >
+            <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
+          </div>
         </section>
 
         <aside className="rail rail-menu">
@@ -361,7 +372,7 @@ export function App() {
             <li key={entry.id}>
               <button type="button" className="plate-card" onClick={() => applyPlate(entry, true)}>
                 <div
-                  className="plate-card-sheet"
+                  className="plate-card-sheet page-sheet"
                   dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(entry.result) }}
                 />
                 <span className="plate-card-meta">{plateLabel(entry.result)}</span>
@@ -380,7 +391,7 @@ export function App() {
             </button>
           </div>
           <div
-            className="viewer-page"
+            className="viewer-page page-sheet"
             dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(viewer) }}
           />
         </div>
