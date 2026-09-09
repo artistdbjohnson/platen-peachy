@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   clampSeed,
   exportPng,
@@ -54,6 +54,7 @@ export function App() {
   const [exporting, setExporting] = useState<"svg" | "png" | null>(null);
   const [exportNote, setExportNote] = useState<string | null>(null);
   const [openFold, setOpenFold] = useState<string | null>(null);
+  const [viewer, setViewer] = useState<EngineResult | null>(null);
 
   const engine = engines.find((e) => e.id === engineId) ?? engines[0];
   const svg = useMemo(() => resultToPreviewSvg(result), [result]);
@@ -99,10 +100,11 @@ export function App() {
   );
 
   const applyPlate = useCallback(
-    (entry: HistoryEntry) => {
+    (entry: HistoryEntry, openViewer = false) => {
       setEngineId(entry.result.engineId);
       commit(entry.result.engineId, entry.result.params, false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (openViewer) setViewer(entry.result);
+      else window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [commit],
   );
@@ -137,90 +139,19 @@ export function App() {
     }
   };
 
-  const essentials = (
-    <>
-      <label className="field">
-        <span>Seed</span>
-        <input
-          type="text"
-          inputMode="numeric"
-          autoComplete="off"
-          spellCheck={false}
-          value={seedDraft}
-          onChange={(e) => setSeedDraft(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
-          onBlur={onSeedBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") generate("keep");
-          }}
-        />
-      </label>
-
-      <label className="field">
-        <span>Engine</span>
-        <select value={engineId} onChange={(e) => setEngineId(e.target.value)}>
-          {engines.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.id} — {item.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <p className="engine-blurb">{engine.blurb}</p>
-
-      <label className="field range">
-        <span>
-          Density <em>{params.density.toFixed(2)}</em>
-        </span>
-        <input
-          type="range"
-          min={0.2}
-          max={1}
-          step={0.01}
-          value={params.density}
-          onChange={(e) => setParams((p) => ({ ...p, density: Number(e.target.value) }))}
-        />
-      </label>
-
-      <label className="field range">
-        <span>
-          Scale <em>{params.scale.toFixed(2)}</em>
-        </span>
-        <input
-          type="range"
-          min={0.1}
-          max={1}
-          step={0.01}
-          value={params.scale}
-          onChange={(e) => setParams((p) => ({ ...p, scale: Number(e.target.value) }))}
-        />
-      </label>
-
-      <label className="field range">
-        <span>
-          Ink <em>{params.ink.toFixed(2)}</em>
-        </span>
-        <input
-          type="range"
-          min={0.25}
-          max={1}
-          step={0.01}
-          value={params.ink}
-          onChange={(e) => setParams((p) => ({ ...p, ink: Number(e.target.value) }))}
-        />
-      </label>
-
-      <div className="export-row">
-        <button type="button" className="export" onClick={onExportSvg} disabled={!!exporting}>
-          {exporting === "svg" ? "Saving…" : "Save SVG"}
-        </button>
-        <button type="button" className="export" onClick={() => void onExportPng()} disabled={!!exporting}>
-          {exporting === "png" ? "Saving…" : "Save PNG"}
-        </button>
-      </div>
-      <p className="hint">SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.</p>
-      {exportNote ? <p className="note-ok">{exportNote}</p> : null}
-    </>
-  );
+  useEffect(() => {
+    if (!viewer) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setViewer(null);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [viewer]);
 
   return (
     <div className="shell">
@@ -233,9 +164,7 @@ export function App() {
         </p>
         <nav className="menu" aria-label="Sections">
           <a href="#gallery">Gallery</a>
-          <button type="button" onClick={() => setOpenFold("about")}>
-            About
-          </button>
+          <a href="#about">About</a>
           <button type="button" onClick={() => setOpenFold("engine")}>
             Engine
           </button>
@@ -250,10 +179,7 @@ export function App() {
           <section className="identity">
             <p className="eyebrow">douglxss · peachy · v0</p>
             <h1>The page still in the machine.</h1>
-            <p className="bio">
-              An Olympia SM3 remembering West LA. One Generate. The sheet stays whole —
-              fit, not crop.
-            </p>
+            <p className="bio">One Generate. The sheet stays whole — a page, not a tile.</p>
             <button type="button" className="generate" onClick={() => generate("keep")}>
               Generate
             </button>
@@ -262,20 +188,105 @@ export function App() {
             </button>
           </section>
 
-          <div className="params card-block" id="essentials">
-            <p className="card-kicker">essentials</p>
-            {essentials}
+          <div className="stack folders-params">
+            <Collapsible
+              id="essentials"
+              title="Essentials"
+              subtitle="seed · params · save"
+              open={openFold === "essentials"}
+              onToggle={toggleFold}
+            >
+              <label className="field">
+                <span>Seed</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={seedDraft}
+                  onChange={(e) => setSeedDraft(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                  onBlur={onSeedBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") generate("keep");
+                  }}
+                />
+              </label>
+
+              <label className="field">
+                <span>Engine</span>
+                <select value={engineId} onChange={(e) => setEngineId(e.target.value)}>
+                  {engines.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.id} — {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="engine-blurb">{engine.blurb}</p>
+
+              <label className="field range">
+                <span>
+                  Density <em>{params.density.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.2}
+                  max={1}
+                  step={0.01}
+                  value={params.density}
+                  onChange={(e) => setParams((p) => ({ ...p, density: Number(e.target.value) }))}
+                />
+              </label>
+
+              <label className="field range">
+                <span>
+                  Scale <em>{params.scale.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={1}
+                  step={0.01}
+                  value={params.scale}
+                  onChange={(e) => setParams((p) => ({ ...p, scale: Number(e.target.value) }))}
+                />
+              </label>
+
+              <label className="field range">
+                <span>
+                  Ink <em>{params.ink.toFixed(2)}</em>
+                </span>
+                <input
+                  type="range"
+                  min={0.25}
+                  max={1}
+                  step={0.01}
+                  value={params.ink}
+                  onChange={(e) => setParams((p) => ({ ...p, ink: Number(e.target.value) }))}
+                />
+              </label>
+
+              <div className="export-row">
+                <button type="button" className="export" onClick={onExportSvg} disabled={!!exporting}>
+                  {exporting === "svg" ? "Saving…" : "Save SVG"}
+                </button>
+                <button type="button" className="export" onClick={() => void onExportPng()} disabled={!!exporting}>
+                  {exporting === "png" ? "Saving…" : "Save PNG"}
+                </button>
+              </div>
+              <p className="hint">SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.</p>
+              {exportNote ? <p className="note-ok">{exportNote}</p> : null}
+            </Collapsible>
           </div>
         </aside>
 
         <section className="hero" aria-label="Artwork">
-          <div className="hero-frame">
+          <button type="button" className="hero-frame" onClick={() => setViewer(result)}>
             <div className="sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-          </div>
+          </button>
         </section>
 
         <aside className="rail rail-menu">
-          {/* Fold ids stay stable so Folio can remap section names from Framer. */}
           <div className="stack">
             <Collapsible
               id="latest"
@@ -290,40 +301,13 @@ export function App() {
                 <ul className="menu-list">
                   {generated.map((entry) => (
                     <li key={entry.id}>
-                      <button type="button" className="menu-link" onClick={() => applyPlate(entry)}>
+                      <button type="button" className="menu-link" onClick={() => applyPlate(entry, true)}>
                         {plateLabel(entry.result)}
                       </button>
                     </li>
                   ))}
                 </ul>
               )}
-            </Collapsible>
-
-            <Collapsible
-              id="about"
-              title="About peachy"
-              subtitle="vs rosy"
-              open={openFold === "about"}
-              onToggle={toggleFold}
-            >
-              <div className="prose">
-                <p>
-                  <strong>platen-peachy</strong> is the second Platen skin. One central sheet.
-                  Controls sit around it. The gallery below is full plates, never clipped
-                  thumbs.
-                </p>
-                <p>
-                  <strong>platen-rosy</strong> is the full cockpit. Peachy answers that with
-                  one Generate. The plate itself stays rosy-format.
-                </p>
-                <p>
-                  Live rosy stays at{" "}
-                  <a href="https://platen-rosy.vercel.app" target="_blank" rel="noreferrer">
-                    platen-rosy.vercel.app
-                  </a>
-                  .
-                </p>
-              </div>
             </Collapsible>
 
             <Collapsible
@@ -345,15 +329,37 @@ export function App() {
         </aside>
       </main>
 
+      <section className="about-card" id="about">
+        <p className="card-kicker">about peachy</p>
+        <h2>Second skin. Same plate.</h2>
+        <div className="prose">
+          <p>
+            <strong>platen-peachy</strong> is the second Platen skin. One central sheet. Folder tabs
+            around it. About and the gallery live below — full pages, never clipped thumbs.
+          </p>
+          <p>
+            <strong>platen-rosy</strong> is the full cockpit. Peachy answers that with one Generate.
+            The plate itself stays rosy-format.
+          </p>
+          <p>
+            Live rosy stays at{" "}
+            <a href="https://platen-rosy.vercel.app" target="_blank" rel="noreferrer">
+              platen-rosy.vercel.app
+            </a>
+            .
+          </p>
+        </div>
+      </section>
+
       <section className="gallery" id="gallery">
         <header className="gallery-head">
           <h2>Gallery</h2>
-          <p>Full sheets. Fit, not crop.</p>
+          <p>Full sheets. Open the page — never a cropped tile.</p>
         </header>
         <ul className="gallery-grid">
           {gallery.map((entry) => (
             <li key={entry.id}>
-              <button type="button" className="plate-card" onClick={() => applyPlate(entry)}>
+              <button type="button" className="plate-card" onClick={() => applyPlate(entry, true)}>
                 <div
                   className="plate-card-sheet"
                   dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(entry.result) }}
@@ -364,6 +370,21 @@ export function App() {
           ))}
         </ul>
       </section>
+
+      {viewer ? (
+        <div className="viewer" role="dialog" aria-modal="true" aria-label={plateLabel(viewer)}>
+          <div className="viewer-bar">
+            <p>{plateLabel(viewer)}</p>
+            <button type="button" className="viewer-close" onClick={() => setViewer(null)}>
+              Close
+            </button>
+          </div>
+          <div
+            className="viewer-page"
+            dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(viewer) }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

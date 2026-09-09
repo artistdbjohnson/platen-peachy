@@ -141,18 +141,28 @@ code {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: min(78dvh, 920px);
+  width: 100%;
+  min-height: min(82dvh, 960px);
+  margin: 0;
   padding: 8px 0;
+  border: 0;
   background: transparent;
   overflow: visible;
+  cursor: zoom-in;
 }
 
 .sheet {
   width: 100%;
-  height: min(78dvh, 920px);
+  height: min(82dvh, 960px);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.sheet svg,
+.viewer-page svg,
+.plate-card-sheet svg {
+  border-radius: 0;
 }
 
 .sheet svg {
@@ -161,8 +171,10 @@ code {
   height: auto;
   max-width: 100%;
   max-height: 100%;
-  border-radius: 0;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 0 1px #1a1612,
+    10px 14px 0 -2px #0c0b0a,
+    0 24px 50px rgba(0, 0, 0, 0.5);
 }
 
 .rail {
@@ -173,14 +185,14 @@ code {
 }
 
 .identity,
-.card-block,
+.about-card,
 .fold {
   background: var(--card);
   border: 1px solid var(--rule);
 }
 
 .identity,
-.card-block {
+.about-card {
   padding: 20px 18px 18px;
   border-radius: var(--radius);
 }
@@ -412,6 +424,19 @@ h1 {
   font-weight: 500;
 }
 
+.about-card {
+  margin-top: 36px;
+  max-width: 720px;
+}
+
+.about-card h2,
+.gallery-head h2 {
+  margin: 8px 0 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 28px;
+}
+
 .gallery {
   margin-top: 36px;
 }
@@ -426,9 +451,6 @@ h1 {
 
 .gallery-head h2 {
   margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 28px;
 }
 
 .gallery-head p {
@@ -473,8 +495,68 @@ h1 {
   width: 100%;
   height: auto;
   max-width: 100%;
-  border-radius: 0;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 1px #1a1612,
+    8px 10px 0 -2px #0c0b0a,
+    0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: #070706;
+  padding: 16px 20px 24px;
+}
+
+.viewer-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.viewer-bar p {
+  margin: 0;
+  color: var(--mute);
+  letter-spacing: 0.04em;
+}
+
+.viewer-close {
+  border: 1px solid var(--rule);
+  background: #0e0c0b;
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.viewer-close:hover {
+  border-color: var(--peach-deep);
+  color: var(--peach);
+}
+
+.viewer-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewer-page svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow:
+    0 0 0 1px #1a1612,
+    12px 16px 0 -2px #0c0b0a,
+    0 28px 60px rgba(0, 0, 0, 0.55);
 }
 
 .plate-card-meta {
@@ -530,7 +612,7 @@ h1 {
     z-index: 6;
   }
 
-  .params {
+  .folders-params {
     grid-area: params;
   }
 
@@ -545,7 +627,7 @@ h1 {
   .hero-frame,
   .sheet {
     min-height: 0;
-    height: min(68dvh, 640px);
+    height: min(70dvh, 640px);
   }
 }
 
@@ -556,6 +638,6 @@ h1 {
 
   .hero-frame,
   .sheet {
-    height: min(62dvh, 520px);
+    height: min(64dvh, 520px);
   }
 }
