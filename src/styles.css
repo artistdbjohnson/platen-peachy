@@ -126,36 +126,9 @@ code {
   text-align: right;
 }
 
-.popouts {
-  position: relative;
-  z-index: 8;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 6px 8px;
-}
-
-.popouts .fold {
-  flex: 0 1 240px;
-  position: relative;
-  min-width: min(240px, 100%);
-}
-
-.popouts .fold-body {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% - 1px);
-  z-index: 9;
-  max-height: min(70vh, 560px);
-  overflow: auto;
-  background: rgba(20, 18, 16, 0.97);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-}
-
 .stage {
   position: relative;
-  min-height: calc(100dvh - 108px);
+  min-height: calc(100dvh - 64px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,10 +136,28 @@ code {
 
 .hero {
   width: 100%;
-  min-height: calc(100dvh - 108px);
+  min-height: calc(100dvh - 64px);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.rail {
+  position: absolute;
+  top: 8px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(260px, 30vw);
+}
+
+.rail-l { left: 0; }
+.rail-r { right: 0; }
+
+.rail .fold-body {
+  max-height: min(68vh, 540px);
+  overflow: auto;
 }
 
 .sheet {
@@ -183,7 +174,8 @@ code {
 .page-sheet,
 .page-sheet svg,
 .sheet svg,
-.viewer-page svg {
+.viewer-page svg,
+.plate-card-sheet svg {
   border-radius: 0;
   overflow: visible;
 }
@@ -463,13 +455,60 @@ h2 {
   color: var(--mute);
 }
 
-.gallery-list {
+.gallery-grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
-  max-width: 520px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+}
+
+.plate-card {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  cursor: zoom-in;
+  text-align: left;
+}
+
+.plate-card:hover .plate-card-meta {
+  color: var(--peach);
+}
+
+.plate-card-sheet {
+  display: block;
+  overflow: visible;
+  background: transparent;
+  border-radius: 0;
+}
+
+.plate-card-sheet svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  box-shadow:
+    1px 0 0 #2a241c,
+    0 1px 0 #1a1612,
+    -1px 0 0 #100e0c,
+    0 -1px 0 #161310,
+    8px 11px 0 -2px #0b0a09,
+    0 18px 34px rgba(0, 0, 0, 0.42);
+}
+
+.plate-card-meta {
+  color: var(--mute);
+  font-size: 12px;
+  letter-spacing: 0.04em;
 }
 
 .viewer {
@@ -555,19 +594,34 @@ h2 {
     order: 3;
   }
 
-  .popouts .fold {
-    flex: 1 1 100%;
+  .stage {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 10px;
   }
 
-  .popouts .fold-body {
-    position: static;
+  .hero {
+    order: 1;
+    min-height: min(64dvh, 620px);
+  }
+
+  .rail {
+    position: relative;
+    top: auto;
+    width: 100%;
+  }
+
+  .rail-l { order: 2; left: auto; }
+  .rail-r { order: 3; right: auto; }
+
+  .rail .fold-body {
     max-height: none;
-    box-shadow: none;
   }
 
   .stage,
   .hero {
-    min-height: min(68dvh, 640px);
+    min-height: min(64dvh, 620px);
   }
 
   .sheet svg {

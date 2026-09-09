@@ -181,7 +181,8 @@ export function App() {
         </p>
       </header>
 
-      <div className="popouts" role="navigation" aria-label="Folders">
+      <main className="stage">
+        <aside className="rail rail-l" aria-label="Parameters">
         <Collapsible
           id="essentials"
           title="Essentials"
@@ -274,7 +275,13 @@ export function App() {
               <p className="hint">SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.</p>
               {exportNote ? <p className="note-ok">{exportNote}</p> : null}
         </Collapsible>
+        </aside>
 
+        <section className="hero" aria-label="Artwork">
+          <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
+        </section>
+
+        <aside className="rail rail-r" aria-label="Folders">
         <Collapsible
           id="latest"
           title="Latest work"
@@ -312,12 +319,7 @@ export function App() {
                 </p>
               </div>
         </Collapsible>
-      </div>
-
-      <main className="stage">
-        <section className="hero" aria-label="Artwork">
-          <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-        </section>
+        </aside>
       </main>
 
       <section className="about-card" id="about">
@@ -325,8 +327,8 @@ export function App() {
         <h2>The page still in the machine.</h2>
         <div className="prose">
           <p>
-            <strong>platen-peachy</strong> follows a Hanssen-like home: one central sheet.
-            Peripheral tabs drop down. Gallery opens that same page — never a clipped grid.
+            <strong>platen-peachy</strong> is one central rosy sheet. Folder tabs sit around it.
+            About and the gallery are cards below — full pages, never a clipped grid on the home.
           </p>
           <p>
             <strong>platen-rosy</strong> is the full cockpit. Peachy answers with one Generate. The
@@ -345,13 +347,17 @@ export function App() {
       <section className="gallery" id="gallery">
         <header className="gallery-head">
           <h2>Gallery</h2>
-          <p>Open the full sheet. No preview tiles.</p>
+          <p>Full pages. Open the sheet — never a cropped tile.</p>
         </header>
-        <ul className="gallery-list">
+        <ul className="gallery-grid">
           {gallery.map((entry) => (
             <li key={entry.id}>
-              <button type="button" className="menu-link" onClick={() => openSheet(entry)}>
-                {plateLabel(entry.result)}
+              <button type="button" className="plate-card" onClick={() => openSheet(entry)}>
+                <div
+                  className="plate-card-sheet page-sheet"
+                  dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(entry.result) }}
+                />
+                <span className="plate-card-meta">{plateLabel(entry.result)}</span>
               </button>
             </li>
           ))}
