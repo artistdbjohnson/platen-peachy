@@ -5,7 +5,7 @@ import {
   exportSvg,
   listEngines,
   randomSeed,
-  resultToSvg,
+  resultToPreviewSvg,
   runEngine,
   type EngineParams,
   type EngineResult,
@@ -35,7 +35,7 @@ export function App() {
   const [exportNote, setExportNote] = useState<string | null>(null);
 
   const engine = engines.find((e) => e.id === engineId) ?? engines[0];
-  const svg = useMemo(() => resultToSvg(result), [result]);
+  const svg = useMemo(() => resultToPreviewSvg(result), [result]);
 
   const commit = useCallback(
     (nextEngine: string, nextParams: EngineParams, record: boolean) => {

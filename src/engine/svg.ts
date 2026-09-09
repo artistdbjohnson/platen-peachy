@@ -2,35 +2,53 @@ import { SM3, type EngineResult } from "./types";
 
 const PAPER = "#161310";
 const INK = "#f0d8bc";
-const RULE = "#2c261f";
+const RULE = "#3a3228";
 
-export function resultToSvg(result: EngineResult, opts?: { paper?: string; ink?: string }): string {
-  const paper = opts?.paper ?? PAPER;
-  const ink = opts?.ink ?? INK;
-  const { cols, rows, cells, params } = result;
-  const pad = 0.35;
-  const widthIn = cols * SM3.cellIn + pad * 2;
-  const heightIn = rows * SM3.lineIn + pad * 2;
-  const opacity = 0.45 + params.ink * 0.55;
-  const fontPt = 11;
+/** 72 user units per inch so font-size="11" is a true 11pt strike. */
+const U = 72;
 
-  const marks = cells
+function pageSize(result: EngineResult) {
+  const pad = 0.32 * U;
+  const width = result.cols * SM3.cellIn * U + pad * 2;
+  const height = result.rows * SM3.lineIn * U + pad * 2;
+  return { pad, width, height, widthIn: width / U, heightIn: height / U };
+}
+
+function marks(result: EngineResult, pad: number): string {
+  const { cells, params } = result;
+  return cells
     .map((c) => {
-      const x = pad + c.cx * SM3.cellIn + SM3.cellIn * 0.5;
-      const y = pad + c.cy * SM3.lineIn + SM3.lineIn * 0.72;
-      const drift = ((c.cx * 17 + c.cy * 9 + params.seed) % 7) * 0.004 - 0.012;
-      return `<text x="${(x + drift).toFixed(4)}" y="${y.toFixed(4)}">${escapeXml(c.glyph)}</text>`;
+      const x = pad + c.cx * SM3.cellIn * U + (SM3.cellIn * U) / 2;
+      const y = pad + c.cy * SM3.lineIn * U + SM3.lineIn * U * 0.72;
+      const drift = ((c.cx * 17 + c.cy * 9 + params.seed) % 7) * 0.12 - 0.36;
+      return `<text x="${(x + drift).toFixed(2)}" y="${y.toFixed(2)}">${escapeXml(c.glyph)}</text>`;
     })
     .join("");
+}
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn}in" height="${heightIn}in" viewBox="0 0 ${widthIn} ${heightIn}">
+export function resultToSvg(
+  result: EngineResult,
+  opts?: { paper?: string; ink?: string; declaration?: boolean },
+): string {
+  const paper = opts?.paper ?? PAPER;
+  const ink = opts?.ink ?? INK;
+  const { pad, width, height, widthIn, heightIn } = pageSize(result);
+  const opacity = 0.5 + result.params.ink * 0.5;
+
+  const body = `<svg xmlns="http://www.w3.org/2000/svg" width="${widthIn.toFixed(3)}in" height="${heightIn.toFixed(3)}in" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}" role="img" aria-label="Platen sheet">
   <rect width="100%" height="100%" fill="${paper}"/>
-  <rect x="${pad / 2}" y="${pad / 2}" width="${(widthIn - pad).toFixed(4)}" height="${(heightIn - pad).toFixed(4)}" fill="none" stroke="${RULE}" stroke-width="0.01"/>
-  <g fill="${ink}" fill-opacity="${opacity.toFixed(3)}" font-family="Courier New, Courier, monospace" font-size="${fontPt}pt" text-anchor="middle">
-    ${marks}
+  <rect x="${(pad / 2).toFixed(2)}" y="${(pad / 2).toFixed(2)}" width="${(width - pad).toFixed(2)}" height="${(height - pad).toFixed(2)}" fill="none" stroke="${RULE}" stroke-width="0.75"/>
+  <g fill="${ink}" fill-opacity="${opacity.toFixed(3)}" font-family="Courier New, Courier, monospace" font-size="11" text-anchor="middle">
+    ${marks(result, pad)}
   </g>
 </svg>`;
+
+  if (opts?.declaration === false) return body;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${body}`;
+}
+
+export function resultToPreviewSvg(result: EngineResult): string {
+  return resultToSvg(result, { declaration: false });
 }
 
 function escapeXml(s: string): string {
@@ -60,9 +78,9 @@ export function exportSvg(result: EngineResult): void {
 }
 
 export async function exportPng(result: EngineResult): Promise<void> {
+  const { width, height } = pageSize(result);
+  const scale = 2;
   const svg = resultToSvg(result);
-  const widthPx = Math.round((result.cols * SM3.cellIn + 0.7) * 150);
-  const heightPx = Math.round((result.rows * SM3.lineIn + 0.7) * 150);
   const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
@@ -76,13 +94,13 @@ export async function exportPng(result: EngineResult): Promise<void> {
     });
 
     const canvas = document.createElement("canvas");
-    canvas.width = widthPx;
-    canvas.height = heightPx;
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("No canvas context");
     ctx.fillStyle = PAPER;
-    ctx.fillRect(0, 0, widthPx, heightPx);
-    ctx.drawImage(img, 0, 0, widthPx, heightPx);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
     const png = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png");
