@@ -41,6 +41,6 @@ export { generate, PREVIEW_GRID, toPlatenParams };
 export { PLACEHOLDER_ENGINES, getEngine } from "./placeholder";
 export { makePRNG, randomSeed, clampSeed } from "./prng";
 export { resultToSvg, resultToPreviewSvg, exportSvg, exportPng, filenameFor } from "./svg";
-export { plateHeaderLines } from "./plate";
+export { plateHeaderLines, assertRosyPlateHeader } from "./plate";
 export type { EngineParams, EngineResult, HistoryEntry, PlatenEngine, Cell, Glyph } from "./types";
 export { SM3, GLYPHS, GLYPH_BY_LEVEL, LEVEL_BANDS } from "./types";

@@ -75,14 +75,19 @@ registerEngine({
 
 Leave `generate()` and `svg.ts` alone. They already match the SM3 strike → archival SVG path.
 
-The **plate** (what you see in the hero and what export writes) is rosy-format, not peachy chrome:
+The **plate** (hero + SVG/PNG) is the rosy sheet, not peachy chrome. Same 10-line telemetry as `getTypewriterHeaderLines` on an 85-col US Letter grid:
 
-1. `PLATEN  -  BY DGLXSS  -  SEED #…`
-2. `LEVEL 1`–`5` with `GLYPH` + `DENSITY`
-3. `DATE: YYYY.MM.DD \\ SPACE: … - ENG: … - SYM: … - INK: …`
-4. the glyph field
+```
+(blank)
+PLATEN  -  BY DGLXSS  -  SEED #…
+(blank)
+LEVEL 1    GLYPH: /    DENSITY: 0.20 - 0.36
+LEVEL 2 … 5
+(blank)
+DATE: YYYY.MM.DD \\ SPACE: CARTESIAN - ENG: … - SYM: … - INK: …
+```
 
-Do not replace that block with RECTO captions or gradient art cards. Dashboard chrome around the plate may stay peachy.
+then the glyph field. No RECTO captions, no gradient art cards. Dashboard chrome around the plate may stay peachy. `npm test` asserts this header.
 
 ## Layout notes
 

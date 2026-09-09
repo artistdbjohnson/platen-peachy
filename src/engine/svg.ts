@@ -1,9 +1,9 @@
 import { headerRowCount, plateHeaderLines } from "./plate";
 import { SM3, type EngineResult } from "./types";
 
-/** Flat plate — no gradient cards. Rosy black canvas. */
-const PAPER = "#111111";
-const INK = "#e8e0d4";
+/** Rosy black canvas — no gradient cards. */
+const PAPER = "#0a0a0a";
+const INK = "#e8e4dc";
 
 /** 72 user units per inch so font-size="11" is a true 11pt strike. */
 const U = 72;
@@ -16,11 +16,11 @@ function pageSize(result: EngineResult) {
   return { pad, width, height, widthIn: width / U, heightIn: height / U, rows };
 }
 
-function cellText(cx: number, cy: number, ch: string, pad: number, seed: number): string {
+function cellText(cx: number, cy: number, ch: string, pad: number, seed: number, drift: boolean): string {
   const x = pad + cx * SM3.cellIn * U + (SM3.cellIn * U) / 2;
   const y = pad + cy * SM3.lineIn * U + SM3.lineIn * U * 0.72;
-  const drift = ((cx * 17 + cy * 9 + seed) % 7) * 0.12 - 0.36;
-  return `<text x="${(x + drift).toFixed(2)}" y="${y.toFixed(2)}">${escapeXml(ch)}</text>`;
+  const dx = drift ? ((cx * 17 + cy * 9 + seed) % 7) * 0.12 - 0.36 : 0;
+  return `<text x="${(x + dx).toFixed(2)}" y="${y.toFixed(2)}">${escapeXml(ch)}</text>`;
 }
 
 function marks(result: EngineResult, pad: number): string {
@@ -28,11 +28,11 @@ function marks(result: EngineResult, pad: number): string {
   const offset = headerRowCount(result);
   const head = header.flatMap((line, cy) =>
     [...fitRow(line, result.cols)].flatMap((ch, cx) =>
-      ch === " " ? [] : [cellText(cx, cy, ch, pad, result.params.seed)],
+      ch === " " ? [] : [cellText(cx, cy, ch, pad, result.params.seed, false)],
     ),
   );
   const field = result.cells.map((c) =>
-    cellText(c.cx, c.cy + offset, c.glyph, pad, result.params.seed),
+    cellText(c.cx, c.cy + offset, c.glyph, pad, result.params.seed, true),
   );
   return [...head, ...field].join("");
 }

@@ -1,7 +1,8 @@
 import { makePRNG } from "./prng";
 import { GLYPH_BY_LEVEL, type Cell, type EngineParams, type EngineResult, type Glyph, type GlyphLevel, type GridSpec, type PlatenEngine } from "./types";
 
-const DEFAULT_GRID: GridSpec = { cols: 39, rows: 51 };
+/** US Letter at SM3 Pica — 10 CPI × 6 LPI. Fits rosy telemetry on one DATE line. */
+const DEFAULT_GRID: GridSpec = { cols: 85, rows: 66 };
 
 function levelFromWeight(wt: number): GlyphLevel {
   if (wt < 0.36) return 0;

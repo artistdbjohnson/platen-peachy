@@ -144,7 +144,7 @@ code {
   display: block;
   width: 100%;
   height: auto;
-  min-width: 280px;
+  min-width: 560px;
 }
 
 .rail {
@@ -459,6 +459,6 @@ h1 {
   }
 
   .sheet svg {
-    min-width: 320px;
+    min-width: 560px;
   }
 }
