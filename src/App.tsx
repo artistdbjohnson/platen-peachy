@@ -99,12 +99,11 @@ export function App() {
     [commit, engineId, params, seedDraft],
   );
 
-  const applyPlate = useCallback(
-    (entry: HistoryEntry, openViewer = false) => {
+  const openSheet = useCallback(
+    (entry: HistoryEntry) => {
       setEngineId(entry.result.engineId);
       commit(entry.result.engineId, entry.result.params, false);
-      if (openViewer) setViewer(entry.result);
-      else window.scrollTo({ top: 0, behavior: "smooth" });
+      setViewer(entry.result);
     },
     [commit],
   );
@@ -175,16 +174,15 @@ export function App() {
       </header>
 
       <main className="stage">
+        <section className="hero" aria-label="Artwork">
+          <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
+        </section>
+
         <aside className="rail rail-params">
           <section className="identity">
             <p className="eyebrow">douglxss · peachy · v0</p>
-            <h1>The page still in the machine.</h1>
-            <p className="bio">One Generate. The sheet stays whole — a page, not a tile.</p>
             <button type="button" className="generate" onClick={() => generate("keep")}>
               Generate
-            </button>
-            <button type="button" className="ghost" onClick={() => generate("fresh")}>
-              New seed, then generate
             </button>
           </section>
 
@@ -266,6 +264,10 @@ export function App() {
                 />
               </label>
 
+              <button type="button" className="ghost" onClick={() => generate("fresh")}>
+                New seed, then generate
+              </button>
+
               <div className="export-row">
                 <button type="button" className="export" onClick={onExportSvg} disabled={!!exporting}>
                   {exporting === "svg" ? "Saving…" : "Save SVG"}
@@ -280,23 +282,6 @@ export function App() {
           </div>
         </aside>
 
-        <section className="hero" aria-label="Artwork">
-          <div
-            className="hero-frame"
-            role="button"
-            tabIndex={0}
-            onClick={() => setViewer(result)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setViewer(result);
-              }
-            }}
-          >
-            <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-          </div>
-        </section>
-
         <aside className="rail rail-menu">
           <div className="stack">
             <Collapsible
@@ -307,12 +292,12 @@ export function App() {
               onToggle={toggleFold}
             >
               {generated.length === 0 ? (
-                <p className="empty">Nothing struck yet. Generate once — full plates land in the gallery.</p>
+                <p className="empty">Nothing struck yet. Generate, then open a sheet from the list.</p>
               ) : (
                 <ul className="menu-list">
                   {generated.map((entry) => (
                     <li key={entry.id}>
-                      <button type="button" className="menu-link" onClick={() => applyPlate(entry, true)}>
+                      <button type="button" className="menu-link" onClick={() => openSheet(entry)}>
                         {plateLabel(entry.result)}
                       </button>
                     </li>
@@ -342,15 +327,15 @@ export function App() {
 
       <section className="about-card" id="about">
         <p className="card-kicker">about peachy</p>
-        <h2>Second skin. Same plate.</h2>
+        <h2>The page still in the machine.</h2>
         <div className="prose">
           <p>
-            <strong>platen-peachy</strong> is the second Platen skin. One central sheet. Folder tabs
-            around it. About and the gallery live below — full pages, never clipped thumbs.
+            <strong>platen-peachy</strong> is one sheet at a time. The home is the full rosy page.
+            Folders hold the few controls. Gallery opens that same page — never a clipped grid.
           </p>
           <p>
-            <strong>platen-rosy</strong> is the full cockpit. Peachy answers that with one Generate.
-            The plate itself stays rosy-format.
+            <strong>platen-rosy</strong> is the full cockpit. Peachy answers with one Generate. The
+            plate itself stays rosy-format.
           </p>
           <p>
             Live rosy stays at{" "}
@@ -365,17 +350,13 @@ export function App() {
       <section className="gallery" id="gallery">
         <header className="gallery-head">
           <h2>Gallery</h2>
-          <p>Full sheets. Open the page — never a cropped tile.</p>
+          <p>Open the full sheet. No preview tiles.</p>
         </header>
-        <ul className="gallery-grid">
+        <ul className="gallery-list">
           {gallery.map((entry) => (
             <li key={entry.id}>
-              <button type="button" className="plate-card" onClick={() => applyPlate(entry, true)}>
-                <div
-                  className="plate-card-sheet page-sheet"
-                  dangerouslySetInnerHTML={{ __html: resultToPreviewSvg(entry.result) }}
-                />
-                <span className="plate-card-meta">{plateLabel(entry.result)}</span>
+              <button type="button" className="menu-link" onClick={() => openSheet(entry)}>
+                {plateLabel(entry.result)}
               </button>
             </li>
           ))}
