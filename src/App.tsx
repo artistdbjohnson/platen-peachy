@@ -139,13 +139,14 @@ export function App() {
   };
 
   useEffect(() => {
-    if (!viewer) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setViewer(null);
+      if (e.key !== "Escape") return;
+      if (viewer) setViewer(null);
+      else setOpenFold(null);
     };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (viewer) document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
@@ -164,36 +165,30 @@ export function App() {
         <nav className="menu" aria-label="Sections">
           <a href="#gallery">Gallery</a>
           <a href="#about">About</a>
-          <button type="button" onClick={() => setOpenFold("engine")}>
-            Engine
-          </button>
         </nav>
+        <button
+          type="button"
+          className="generate"
+          onClick={() => {
+            setOpenFold(null);
+            generate("keep");
+          }}
+        >
+          Generate
+        </button>
         <p className="top-meta">
           SM3 · {result.cols}×{result.rows} · {engine.name} · {padSeed(result.params.seed)}
         </p>
       </header>
 
-      <main className="stage">
-        <section className="hero" aria-label="Artwork">
-          <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
-        </section>
-
-        <aside className="rail rail-params">
-          <section className="identity">
-            <p className="eyebrow">douglxss · peachy · v0</p>
-            <button type="button" className="generate" onClick={() => generate("keep")}>
-              Generate
-            </button>
-          </section>
-
-          <div className="stack folders-params">
-            <Collapsible
-              id="essentials"
-              title="Essentials"
-              subtitle="seed · params · save"
-              open={openFold === "essentials"}
-              onToggle={toggleFold}
-            >
+      <div className="popouts" role="navigation" aria-label="Folders">
+        <Collapsible
+          id="essentials"
+          title="Essentials"
+          subtitle="seed · params · save"
+          open={openFold === "essentials"}
+          onToggle={toggleFold}
+        >
               <label className="field">
                 <span>Seed</span>
                 <input
@@ -278,19 +273,15 @@ export function App() {
               </div>
               <p className="hint">SVG is archival inches (10 CPI / 6 LPI). PNG is a 2× raster.</p>
               {exportNote ? <p className="note-ok">{exportNote}</p> : null}
-            </Collapsible>
-          </div>
-        </aside>
+        </Collapsible>
 
-        <aside className="rail rail-menu">
-          <div className="stack">
-            <Collapsible
-              id="latest"
-              title="Latest work"
-              subtitle={`${generated.length} kept`}
-              open={openFold === "latest"}
-              onToggle={toggleFold}
-            >
+        <Collapsible
+          id="latest"
+          title="Latest work"
+          subtitle={`${generated.length} kept`}
+          open={openFold === "latest"}
+          onToggle={toggleFold}
+        >
               {generated.length === 0 ? (
                 <p className="empty">Nothing struck yet. Generate, then open a sheet from the list.</p>
               ) : (
@@ -320,9 +311,13 @@ export function App() {
                   <code>calcMotifWeight(x, y, w, h, engine, params)</code>.
                 </p>
               </div>
-            </Collapsible>
-          </div>
-        </aside>
+        </Collapsible>
+      </div>
+
+      <main className="stage">
+        <section className="hero" aria-label="Artwork">
+          <div className="sheet page-sheet" dangerouslySetInnerHTML={{ __html: svg }} />
+        </section>
       </main>
 
       <section className="about-card" id="about">
@@ -330,8 +325,8 @@ export function App() {
         <h2>The page still in the machine.</h2>
         <div className="prose">
           <p>
-            <strong>platen-peachy</strong> is one sheet at a time. The home is the full rosy page.
-            Folders hold the few controls. Gallery opens that same page — never a clipped grid.
+            <strong>platen-peachy</strong> follows a Hanssen-like home: one central sheet.
+            Peripheral tabs drop down. Gallery opens that same page — never a clipped grid.
           </p>
           <p>
             <strong>platen-rosy</strong> is the full cockpit. Peachy answers with one Generate. The
