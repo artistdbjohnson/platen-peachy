@@ -44,7 +44,7 @@ Build: `npm run build`. Preview: `npm run preview`.
 2. Press **Generate** (desktop rail and sticky on ~390px). Optional: **New seed, then generate**.
 3. Tune seed / engine / density / scale / ink. Keep it small on purpose.
 4. **Save SVG** (archival inches, 10 CPI / 6 LPI, 0.082" slug) or **Save PNG** (150 dpi preview).
-5. **Latest work**, **Essentials**, **About peachy**, and **Engine** are a Hanssen-style link stack. On a phone they start closed so the sheet stays the hero. Desktop opens Essentials.
+5. **Latest work**, **Essentials**, **About peachy**, and **Engine** are a Hanssen-style link stack. They start closed so the sheet stays the hero; open one tab at a time.
 
 ## Engine scaffold
 

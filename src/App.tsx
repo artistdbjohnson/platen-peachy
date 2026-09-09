@@ -12,7 +12,6 @@ import {
   type HistoryEntry,
 } from "./engine";
 import { Collapsible } from "./ui/Collapsible";
-import { useMediaQuery } from "./ui/useMediaQuery";
 
 const DEFAULT_PARAMS: EngineParams = {
   seed: 1952,
@@ -27,7 +26,6 @@ function padSeed(n: number): string {
 
 export function App() {
   const engines = useMemo(() => listEngines(), []);
-  const isPhone = useMediaQuery("(max-width: 860px)");
   const [engineId, setEngineId] = useState(engines[0].id);
   const [params, setParams] = useState<EngineParams>(DEFAULT_PARAMS);
   const [seedDraft, setSeedDraft] = useState(String(DEFAULT_PARAMS.seed));
@@ -39,19 +37,10 @@ export function App() {
 
   const engine = engines.find((e) => e.id === engineId) ?? engines[0];
   const svg = useMemo(() => resultToPreviewSvg(result), [result]);
-  const essentialsOpen = openFold === "essentials" || (!isPhone && openFold === null);
 
-  const toggleFold = useCallback(
-    (id: string) => {
-      setOpenFold((current) => {
-        const isEssentialsDefault = !isPhone && current === null && id === "essentials";
-        if (isEssentialsDefault) return "";
-        if (current === id) return isPhone ? null : "";
-        return id;
-      });
-    },
-    [isPhone],
-  );
+  const toggleFold = useCallback((id: string) => {
+    setOpenFold((current) => (current === id ? null : id));
+  }, []);
 
   const commit = useCallback((nextEngine: string, nextParams: EngineParams, record: boolean) => {
     const next = runEngine(nextEngine, nextParams);
@@ -192,7 +181,7 @@ export function App() {
               id="essentials"
               title="Essentials"
               subtitle="seed · params · save"
-              open={essentialsOpen}
+              open={openFold === "essentials"}
               onToggle={toggleFold}
             >
               <label className="field">
